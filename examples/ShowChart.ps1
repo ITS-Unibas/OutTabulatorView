@@ -4,7 +4,8 @@ param(
 
 Import-Module ..\OutTabulatorView.psd1 -Force
 
-function New-Record {
+function New-Record
+{
     param(
         $Name,
         $Progress,
@@ -16,7 +17,7 @@ function New-Record {
         $Driver
     )
 
-    [pscustomobject]([ordered]@{} + $PSBoundParameters)
+    [pscustomobject]([ordered]@{ } + $PSBoundParameters)
 }
 
 $data = $(
@@ -43,20 +44,21 @@ $data = $(
 )
 
 $ColumnProperties = $(
-    New-ColumnOption Name -frozen true
+    New-ColumnOption Name -frozen true -headerFilter select
     New-ColumnOption Progress -formatter progress
     New-ColumnOption Activity -formatter lineFormatter
     New-ColumnOption Rating -formatter star
-    New-ColumnOption Driver -formatter tickCross
-    New-ColumnOption dob -title "Date of Birth"
+    New-ColumnOption Driver -formatter tickCross -headerFilter tick
+    New-ColumnOption dob -title "Date of Birth" -headerFilter true
 )
 
-if ($NoColumnProperties) { $ColumnProperties = @{} }
+if ($NoColumnProperties) { $ColumnProperties = @{ } 
+}
 
 $data |
-    Out-TabulatorView $ColumnProperties -theme Site `
-        -height 250 `
-        -layout fitColumns `
-        -pagination local `
-        -paginationSize 10 `
-        -clipboard
+Out-TabulatorView $ColumnProperties -theme Site `
+    -height 250 `
+    -layout fitColumns `
+    -pagination local `
+    -paginationSize 10 `
+    -clipboard
