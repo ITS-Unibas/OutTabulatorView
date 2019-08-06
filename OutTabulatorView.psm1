@@ -1,4 +1,5 @@
-function Out-TabulatorView {
+function Out-TabulatorView
+{
     [CmdletBinding()]
     param(
         $columnOptions,
@@ -12,53 +13,67 @@ function Out-TabulatorView {
         $paginationSize,
         $groupBy,
         [switch]$clipboard,
+        [switch]$headerFilter,
         [Parameter(ValueFromPipeline)]
         $data
     )
 
-    Begin {
+    Begin
+    {
         $htmlFileName = [system.io.path]::GetTempFileName() -replace "\.tmp", ".html"
         $records = @()
     }
 
-    Process {
+    Process
+    {
         $records += @($data)
     }
 
-    End {
+    End
+    {
 
         $names = $records[0].psobject.properties.name
         $targetData = $records | ConvertTo-Json -Depth 2 -Compress
 
-        if ($records.Count -eq $null -or $records.Count -eq 1) {
+        if ($records.Count -eq $null -or $records.Count -eq 1)
+        {
             $targetData = "[{0}]" -f $targetData
         }
 
-        $tabulatorColumnOptions = @{}
+        $tabulatorColumnOptions = @{ }
         $tabulatorColumnOptions.columns = @()
 
-        foreach ($name in $names) {
-            $targetColumn = @{field = $name}
+        foreach ($name in $names)
+        {
+            $targetColumn = @{field = $name }
 
-            if ($columnOptions.$name) {
+            if ($columnOptions.$name)
+            {
                 $columnOptions.$name.getenumerator() | ForEach-Object {
                     $targetColumn.($_.key) = $_.value
                 }
             }
 
-            if (!$targetColumn.ContainsKey("title")) {
+            if (!$targetColumn.ContainsKey("title"))
+            {
                 $targetColumn.title = $name
+            }
+
+            if ($headerFilter)
+            {
+                $targetColumn.headerFilter = "input"
             }
 
             $tabulatorColumnOptions.columns += $targetColumn
         }
 
-        $params = @{} + $PSBoundParameters
+        $params = @{ } + $PSBoundParameters
 
         $params.Remove("columnOptions")
         $params.Remove("data")
 
-        foreach ($entity in $params.GetEnumerator()) {
+        foreach ($entity in $params.GetEnumerator())
+        {
             $tabulatorColumnOptions.($entity.Key) = $entity.Value
         }
 
@@ -68,7 +83,7 @@ function Out-TabulatorView {
 
         $tabulatorColumnOptions = $tabulatorColumnOptions.Substring(0, $tabulatorColumnOptions.Length - 1)
 
-@"
+        @"
 <!doctype html>
 
 <html lang="en">
@@ -119,7 +134,8 @@ if($theme) {
     }
 }
 
-function New-ColumnOption {
+function New-ColumnOption
+{
     param(
         [Parameter(Mandatory)]
         $ColumnName,
@@ -136,13 +152,14 @@ function New-ColumnOption {
         [string]$headerSort,
         [ValidateSet('true', 'false')]
         [string]$frozen,
+        $headerFilter,
         [int]$width
     )
 
     $cn = $PSBoundParameters.ColumnName
     $null = $PSBoundParameters.Remove("ColumnName")
 
-    @{$cn = @{} + $PSBoundParameters}
+    @{$cn = @{ } + $PSBoundParameters }
 }
 
 Set-Alias otv Out-TabulatorView
