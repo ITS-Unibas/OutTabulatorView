@@ -77,9 +77,22 @@ function Out-TabulatorView
             $tabulatorColumnOptions.($entity.Key) = $entity.Value
         }
 
+        foreach ($column in $tabulatorColumnOptions.columns)
+        {
+            if ($column.headerFilter -eq 'select')
+            {
+                $htArr = [ordered]@{ }
+                $htArr.Add('', $null)
+                $records.$($column.field) | Sort-Object -Property { $_ } | Select-Object -Unique | foreach {
+                    $htArr.Add($_, $_)
+                }
+                $column.Add('headerFilterParams', $htArr)
+            }
+        }
+        
         [string]$tabulatorColumnOptions = $tabulatorColumnOptions | ConvertTo-Json -Depth 5
 
-        $tabulatorColumnOptions = $tabulatorColumnOptions.Replace('"lineFormatter"', 'lineFormatter')
+        $tabulatorColumnOptions = $tabulatorColumnOptions.Replace('"lineFormatter"', 'lineFormatter').Replace('"true"', 'true')
 
         $tabulatorColumnOptions = $tabulatorColumnOptions.Substring(0, $tabulatorColumnOptions.Length - 1)
 
@@ -128,6 +141,7 @@ if($theme) {
 </body>
 </html>
 "@ | set-content -Encoding UTF8 $htmlFileName
+
         Start-Process $htmlFileName
 
         Write-Verbose $htmlFileName
@@ -144,6 +158,8 @@ function New-ColumnOption
         $formatter,
         [ValidateSet('string', 'number', 'alphanum', 'boolean', 'exists', 'date', 'time', 'datetime', 'array')]
         $sorter,
+        [ValidateSet('input', 'number', 'true', 'tick', 'select', 'textarea')]
+        $headerFilter,
         [ValidateSet('left', 'right', 'center')]
         $align,
         [ValidateSet('input', 'textarea', 'number', 'tick', 'star', 'progress', 'select')]
@@ -152,7 +168,6 @@ function New-ColumnOption
         [string]$headerSort,
         [ValidateSet('true', 'false')]
         [string]$frozen,
-        $headerFilter,
         [int]$width
     )
 
