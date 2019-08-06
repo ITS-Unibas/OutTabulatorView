@@ -1,41 +1,58 @@
 function Out-TabulatorView
 {
     [CmdletBinding()]
-    param(
-        $columnOptions,
-        $height,
+
+    param
+    (
+        $ColumnOptions,
+
+        $Height,
+
         [ValidateSet('fitColumns')]
-        $layout,
+        $Layout,
+
         [ValidateSet('Simple', 'Midnight', 'Modern', 'Site')]
-        $theme,
+        $Theme,
+
         [ValidateSet('local')]
-        $pagination,
-        $paginationSize,
-        $groupBy,
-        [switch]$clipboard,
-        [switch]$headerFilter,
+        $Pagination,
+
+        $PaginationSize,
+
+        $GroupBy,
+
+        [switch]
+        $Clipboard,
+
+        [switch]
+        $HeaderFilter,
+
         [Parameter(ValueFromPipeline)]
-        $data
+        $Data
     )
 
     Begin
     {
-        $htmlFileName = [system.io.path]::GetTempFileName() -replace "\.tmp", ".html"
-        $records = @()
+        $HtmlFileName = [IO.Path]::GetTempFileName() -replace "\.tmp", ".html"
+
+        $Records = @()
+
+        $params = @{ } + $PSBoundParameters
+        $params.Remove("ColumnOptions")
+        $params.Remove("Data")
     }
 
     Process
     {
-        $records += @($data)
+        $Records += @($Data)
     }
 
     End
     {
-
         $names = $records[0].psobject.properties.name
         $targetData = $records | ConvertTo-Json -Depth 2 -Compress
 
-        if ($records.Count -eq $null -or $records.Count -eq 1)
+        if ($null -eq $records.Count -or $records.Count -eq 1)
         {
             $targetData = "[{0}]" -f $targetData
         }
@@ -66,11 +83,6 @@ function Out-TabulatorView
 
             $tabulatorColumnOptions.columns += $targetColumn
         }
-
-        $params = @{ } + $PSBoundParameters
-
-        $params.Remove("columnOptions")
-        $params.Remove("data")
 
         foreach ($entity in $params.GetEnumerator())
         {
@@ -107,16 +119,32 @@ function Out-TabulatorView
     <title>Out-TabulatorView</title>
 </head>
 <body>
-    
+ 
+<!--
 <script type="text/javascript" src="file:///$PSScriptRoot\js\jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="file:///$PSScriptRoot\js\jquery-ui.min.js"></script>
 <script type="text/javascript" src="file:///$PSScriptRoot\js\tabulator.min.js"></script>
 <script type="text/javascript" src="file:///$PSScriptRoot\js\jquery.sparkline.min.js"></script>
+-->
 
-<link href="file:///$PSScriptRoot\css\tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.3.0/js/tabulator.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.3.0/js/jquery_wrapper.min.js"></script>
+
+<!-- <link href="file:///$PSScriptRoot\css\tabulator.min.css" rel="stylesheet"> -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.3.0/css/tabulator.min.css" rel="stylesheet">
+
 $(
-if($theme) {
-    "<link href=`"file:///$PSScriptRoot\css\tabulator_$($theme).min.css`" rel=`"stylesheet`">"
+if ($Theme) {
+    <# "<link href=`"file:///$PSScriptRoot\css\tabulator_$($theme).min.css`" rel=`"stylesheet`">" #>
+    "<link href=`"https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.3.0/css/tabulator_$($Theme.ToLower()).min.css`" rel=`"stylesheet`">"
+}
+else
+{
+    <# "<link href=`"https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.3.0/css/bootstrap/tabulator_bootstrap.min.css`" rel=`"stylesheet`">" #>
+    "<link href=`"https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.3.0/css/semantic-ui/tabulator_semantic-ui.css`" rel=`"stylesheet`">"
 }
 )
 
@@ -124,27 +152,29 @@ if($theme) {
 
 <script type="text/javascript">
     var lineFormatter = function(cell, formatterParams){
-        setTimeout(function(){ //give cell enough time to be added to the DOM before calling sparkline formatter
+            setTimeout(function(){ //give cell enough time to be added to the DOM before calling sparkline formatter
         	cell.getElement().sparkline(cell.getValue(), {width:"100%", type:"line", disableTooltips:true});
         }, 10);
     };
 
-  var tabledata = $($targetData)
+    var tabledata = $($targetData)
 
-  `$("#example-table").tabulator(
+    var table = new Tabulator("#example-table",
         $($tabulatorColumnOptions)
-});
+    });
 
-`$("#example-table").tabulator("setData", tabledata);
+    table.setData(tabledata)
+
+    `$("#example-table").css({"font-family": "Arial, Helvetica, sans-serif"});
 
 </script>
 </body>
 </html>
-"@ | set-content -Encoding UTF8 $htmlFileName
+"@ | Set-Content -Path $HtmlFileName -Encoding UTF8
 
-        Start-Process $htmlFileName
+        Start-Process $HtmlFileName
 
-        Write-Verbose $htmlFileName
+        Write-Verbose $HtmlFileName
     }
 }
 
@@ -177,4 +207,4 @@ function New-ColumnOption
     @{$cn = @{ } + $PSBoundParameters }
 }
 
-Set-Alias otv Out-TabulatorView
+Set-Alias -Name otv -Value Out-TabulatorView
