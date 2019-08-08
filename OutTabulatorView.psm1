@@ -165,7 +165,9 @@ else
 
     table.setData(tabledata)
 
+    <!-- http://tabulator.info/docs/4.3/style -->
     `$("#example-table").css({"font-family": "Arial, Helvetica, sans-serif"});
+    `$("#tabulator").css({"font-family": "Arial, Helvetica, sans-serif"});
 
 </script>
 </body>
