@@ -14,6 +14,11 @@ function Out-TabulatorView
 
         [Parameter(ParameterSetName = 'UseOnline')]
         [Parameter(ParameterSetName = 'UseOffline')]
+        [switch]
+        $AutoSize,
+
+        [Parameter(ParameterSetName = 'UseOnline')]
+        [Parameter(ParameterSetName = 'UseOffline')]
         [ValidateSet('fitColumns', 'fitData')]
         $Layout,
 
@@ -93,6 +98,15 @@ function Out-TabulatorView
         $tabulatorColumnOptions = @{ }
         $tabulatorColumnOptions.columns = @()
 
+        if ($Height)
+        {
+            $tabulatorColumnOptions['height'] = $Height
+        }
+        elseif ($AutoSize)
+        {
+            $tabulatorColumnOptions['height'] = '98vh'
+        }
+
         foreach ($name in $names)
         {
             $targetColumn = @{field = $name}
@@ -147,8 +161,7 @@ function Out-TabulatorView
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
     <title>$($Title)</title>
     $(
     if ($Path -and $UseOffline)
@@ -204,15 +217,17 @@ function Out-TabulatorView
         }, 10);
     };
 
-    var tabledata = $($targetData)
-
     var table = new Tabulator("#example-table",
         $($tabulatorColumnOptions)
     });
 
+    var tabledata = $($targetData)
+    
     table.setData(tabledata)
 
     `$("#example-table").css({"font-family": "Arial, Helvetica, sans-serif"});
+
+    // `$("#example-table").tabulator("redraw");
 
 </script>
 </body>
