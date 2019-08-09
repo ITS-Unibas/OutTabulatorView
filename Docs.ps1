@@ -3,7 +3,7 @@ break
 Install-Module -Name platyPS -Scope CurrentUser -Force
 Import-Module platyPS -Force
 
-$Module = 'UNIBAS.CSSActiveDirectory'
+$Module = 'OutTabulatorView'
 
 # you should have module imported in the session
 Import-Module -Name .\$Module -Force
