@@ -17,7 +17,7 @@ PS> Register-PSRepository -Name 'UNIBAS' -SourceLocation 'http://its-psrepositor
 You can install it using:
 
 ``` PowerShell
-PS> Install-Module -Name OutTabulatorView
+PS> Install-Module -Name OutTabulatorView -Repository UNIBAS -Scope CurrentUser
 ```
 
 ### Updating the module
