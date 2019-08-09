@@ -26,6 +26,7 @@ $paramRegisterPSRepository = @{
     InstallationPolicy        = 'Trusted'   
     PackageManagementProvider = 'NuGet'
 }
+Unregister-PSRepository -Name $paramRegisterPSRepository.Name
 Register-PSRepository @paramRegisterPSRepository
 
 # Publish Module
