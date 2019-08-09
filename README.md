@@ -1,30 +1,67 @@
-<p align="center">
-<a href="https://www.powershellgallery.com/packages/OutTabulatorView"><img
-src="https://img.shields.io/powershellgallery/v/OutTabulatorView.svg"></a>
-<a href="https://www.powershellgallery.com/packages/OutTabulatorView"><img
-src="https://img.shields.io/powershellgallery/dt/OutTabulatorView.svg"></a>
-<a href="./LICENSE.txt"><img
-src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
-</p>
-
 # OutTabulatorView
-PowerShell - Sending output to an interactive table in a browser
 
-Grab it from the [PowerShell Gallery](https://www.powershellgallery.com/packages/OutTabulatorView)
+## Description
 
-# What's New 1.1.0
+Sending output to an interactive table in a browser
 
-- Thank you to [ViperTG](https://github.com/ViperTG) for the pull request : File encoding changed to UTF8 to support characters like `æøå`
+## Installing
 
-```powershell
-Install-Module -Name OutTabulatorView
+The easiest way to get OutTabulatorView is using the [PSRepository UNIBAS](http://its-psrepository.its.unibas.ch/feeds/UNIBAS/).
+
+``` PowerShell
+PS> Register-PSRepository -Name 'UNIBAS' -SourceLocation 'http://its-psrepository.its.unibas.ch/nuget/UNIBAS/' -InstallationPolicy Trusted -PackageManagementProvider NuGet
 ```
 
-## Get Started
+### Installing the module
 
-```powershell
-ps | Select Company, Name, Handles | otv -groupBy Company
+You can install it using:
+
+``` PowerShell
+PS> Install-Module -Name OutTabulatorView
 ```
 
-## In Action
-![](https://raw.githubusercontent.com/dfinke/OutTabulatorView/master/images/otv.gif?token=AAEGunJ7iPFmCGiZRXph7UMcgyX8kyaNks5bFVEHwA%3D%3D)
+### Updating the module
+
+Once installed from the PSRepository, you can update it using:
+
+``` PowerShell
+PS> Update-Module -Name OutTabulatorView
+```
+
+### Removing the module
+
+You can remove it using:
+
+``` PowerShell
+PS> Uninstall-Module -Name OutTabulatorView
+```
+
+## Examples
+
+``` PowerShell
+$Data = Get-Process | Select-Object Company, Name, Handles
+
+$ColumnOptions = $(
+    New-ColumnOption Company -HeaderFilter select
+    New-ColumnOption Name -HeaderFilter input
+    New-ColumnOption Handles -HeaderFilter input
+)
+
+$Data | Out-TabulatorView -ColumnOptions $ColumnOptions -Layout fitColumns -HeaderFilter
+```
+
+``` PowerShell
+$Data = Get-Process | Select-Object Company, Name, Handles
+
+$ColumnOptions = $(
+    New-ColumnOption Company -HeaderFilter select
+    New-ColumnOption Name -HeaderFilter input
+    New-ColumnOption Handles -HeaderFilter input
+)
+
+Out-TabulatorView -Data $Data -ColumnOptions $ColumnOptions -Layout fitData -Path 'C:\Temp\TabulatorView' -Title 'My Processes' -Theme Site
+```
+
+## Release History
+
+A detailed release history is contained in the [Change Log](CHANGELOG.md).
